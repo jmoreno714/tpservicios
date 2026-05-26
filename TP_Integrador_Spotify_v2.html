@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spotify Argentina — TP Integrador</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black:#0a0a0a; --surface:#161616; --surface2:#1e1e1e;
+  --green:#1DB954; --green2:#1ed760; --gdim:rgba(29,185,84,0.12);
+  --white:#ffffff; --off:#b3b3b3; --border:#2a2a2a; --border2:#333;
+  --yellow:#F59B23; --red:#E91429;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--white);font-family:'Space Grotesk',sans-serif;overflow-x:hidden;}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:rgba(10,10,10,0.95);backdrop-filter:blur(16px);
+  height:50px;display:flex;align-items:center;padding:0 1.5rem;gap:0.2rem;
+  overflow-x:auto;border-bottom:1px solid var(--border);
+}
+nav a{
+  color:var(--off);text-decoration:none;font-family:'Space Mono',monospace;
+  font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;
+  padding:0.28rem 0.65rem;border-radius:100px;white-space:nowrap;transition:all 0.2s;
+}
+nav a:hover{color:var(--white);background:var(--surface2);}
+nav a.active{color:var(--black);background:var(--green);}
+
+.slide{min-height:100vh;padding:6rem 0 4rem;opacity:0;transform:translateY(28px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.slide.visible{opacity:1;transform:translateY(0);}
+.inner{max-width:1040px;margin:0 auto;padding:0 2rem;}
+
+/* HERO */
+#s0{opacity:1;transform:none;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;}
+.o1{width:550px;height:550px;background:rgba(29,185,84,0.14);top:-180px;left:-80px;}
+.o2{width:350px;height:350px;background:rgba(29,215,96,0.07);bottom:-80px;right:-40px;}
+#s0 .inner{position:relative;z-index:2;text-align:center;}
+
+.hbadge{display:inline-flex;align-items:center;gap:0.5rem;background:var(--gdim);border:1px solid rgba(29,185,84,0.3);border-radius:100px;padding:0.35rem 0.9rem;margin-bottom:1.8rem;animation:fu 0.7s ease 0.2s both;}
+.hbadge .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+.hbadge span{font-family:'Space Mono',monospace;font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.3);}}
+
+h1.ht{font-size:clamp(4rem,13vw,9rem);font-weight:700;line-height:0.9;letter-spacing:-0.03em;animation:fu 0.7s ease 0.4s both;}
+h1.ht .g{color:var(--green);}
+.hsub{color:var(--off);font-size:1rem;margin-top:1.3rem;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.6;font-weight:300;animation:fu 0.7s ease 0.6s both;}
+
+.hstats{display:flex;justify-content:center;gap:2.5rem;margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border);animation:fu 0.7s ease 0.8s both;flex-wrap:wrap;}
+.hst .v{font-size:1.9rem;font-weight:700;color:var(--green);line-height:1;}
+.hst .l{font-family:'Space Mono',monospace;font-size:0.57rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--off);margin-top:0.25rem;}
+@keyframes fu{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+/* SECTION */
+.stope{display:flex;align-items:flex-start;gap:1.2rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
+.snum{font-family:'Space Mono',monospace;font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);padding-top:0.45rem;white-space:nowrap;}
+h2.st{font-size:clamp(1.9rem,4.5vw,3.2rem);font-weight:700;letter-spacing:-0.02em;line-height:1;}
+h2.st .g{color:var(--green);}
+.sd{color:var(--off);font-size:0.85rem;margin-top:0.4rem;font-weight:300;}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.1rem;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:0.9rem;}
+@media(max-width:768px){.g2,.g3,.g4{grid-template-columns:1fr;}}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.3rem;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--green),transparent);}
+.cl{font-family:'Space Mono',monospace;font-size:0.56rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);margin-bottom:0.55rem;}
+.card h3{font-size:0.95rem;font-weight:600;margin-bottom:0.45rem;}
+.card p{font-size:0.8rem;color:var(--off);line-height:1.65;}
+.card p strong{color:var(--white);}
+
+/* STAT */
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;position:relative;}
+.sc .sv{font-size:2rem;font-weight:700;color:var(--green);line-height:1;letter-spacing:-0.02em;}
+.sc .sl{font-family:'Space Mono',monospace;font-size:0.57rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--off);margin-top:0.3rem;}
+.sc .sn{font-size:0.73rem;color:#555;margin-top:0.4rem;line-height:1.4;}
+.badge{position:absolute;top:0.75rem;right:0.75rem;font-family:'Space Mono',monospace;font-size:0.52rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.18rem 0.45rem;border-radius:100px;}
+.bg{background:var(--gdim);color:var(--green);border:1px solid rgba(29,185,84,0.3);}
+.by{background:rgba(245,155,35,0.12);color:var(--yellow);border:1px solid rgba(245,155,35,0.3);}
+.br{background:rgba(233,20,41,0.12);color:var(--red);border:1px solid rgba(233,20,41,0.3);}
+
+/* TABLE */
+.t{width:100%;border-collapse:collapse;font-size:0.8rem;}
+.t th{font-family:'Space Mono',monospace;font-size:0.56rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--off);text-align:left;padding:0.55rem 0.8rem;border-bottom:1px solid var(--border2);}
+.t td{padding:0.65rem 0.8rem;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5;}
+.t tr:hover td{background:rgba(29,185,84,0.04);}
+.t .hl{color:var(--green);font-family:'Space Mono',monospace;font-weight:700;}
+.t .yr{color:var(--yellow);}
+.t .rr{color:var(--red);}
+
+/* JOURNEY */
+.journey{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:1.3rem 0;}
+@media(max-width:780px){.journey{grid-template-columns:1fr;}}
+.js{padding:1.1rem 0.9rem;border-right:1px solid var(--border);}
+.js:last-child{border-right:none;}
+.js.hi{background:var(--surface);}
+.jn{font-family:'Space Mono',monospace;font-size:0.52rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);margin-bottom:0.35rem;}
+.je{font-size:1.4rem;margin-bottom:0.35rem;}
+.js h4{font-size:0.83rem;font-weight:600;margin-bottom:0.4rem;}
+.jd{font-size:0.72rem;color:var(--off);line-height:1.5;}
+.jp{margin-top:0.7rem;padding-top:0.5rem;border-top:1px dashed var(--border2);font-size:0.68rem;color:#E8623A;font-style:italic;line-height:1.35;}
+
+/* SERVQUAL */
+.sq{display:grid;grid-template-columns:120px 1fr 65px;gap:0.7rem;align-items:center;margin:0.45rem 0;}
+.sql{font-size:0.75rem;color:var(--off);text-align:right;}
+.sqt{height:5px;background:var(--border2);border-radius:100px;overflow:visible;position:relative;}
+.sqe{position:absolute;top:-3px;width:2px;height:11px;background:rgba(255,255,255,0.35);z-index:2;}
+.sqf{height:100%;border-radius:100px;animation:sqfill 1.1s ease both;}
+.sqg{background:var(--green);}
+.sqy{background:var(--yellow);}
+.sqr{background:var(--red);}
+@keyframes sqfill{from{width:0 !important;}}
+.sqv{font-family:'Space Mono',monospace;font-size:0.67rem;font-weight:700;}
+
+/* GAP */
+.gr{display:grid;grid-template-columns:85px 1fr;gap:0.9rem;padding:0.9rem 0;border-bottom:1px solid var(--border);align-items:start;}
+.gr:last-child{border-bottom:none;}
+.gb{font-family:'Space Mono',monospace;font-size:0.55rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.22rem 0.45rem;border-radius:100px;text-align:center;}
+.g1b{background:rgba(233,20,41,0.12);color:var(--red);border:1px solid rgba(233,20,41,0.3);}
+.g2b{background:rgba(245,155,35,0.12);color:var(--yellow);border:1px solid rgba(245,155,35,0.3);}
+.g3b{background:rgba(29,185,84,0.12);color:var(--green);border:1px solid rgba(29,185,84,0.3);}
+.g4b{background:rgba(100,130,255,0.12);color:#8899ff;border:1px solid rgba(100,130,255,0.3);}
+.g5b{background:rgba(255,255,255,0.05);color:var(--off);border:1px solid var(--border2);}
+.gt h4{font-size:0.84rem;font-weight:600;margin-bottom:0.25rem;}
+.gt p{font-size:0.77rem;color:var(--off);line-height:1.55;}
+.gt p strong{color:var(--white);}
+
+/* BLUEPRINT */
+.bp{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:1.3rem 0;}
+.bprow{display:grid;grid-template-columns:100px 1fr;border-bottom:1px solid var(--border);}
+.bprow:last-child{border-bottom:none;}
+.bpz{padding:0.7rem;font-family:'Space Mono',monospace;font-size:0.52rem;letter-spacing:0.07em;text-transform:uppercase;border-right:1px solid var(--border2);display:flex;align-items:center;line-height:1.4;}
+.zf{background:rgba(29,185,84,0.07);color:var(--green);}
+.zb{background:rgba(100,130,255,0.07);color:#8899ff;}
+.zs{background:rgba(245,155,35,0.07);color:var(--yellow);}
+.ze{background:rgba(255,255,255,0.03);color:#555;}
+.bps{display:flex;overflow-x:auto;}
+.bpst{min-width:120px;padding:0.7rem;border-right:1px solid var(--border);font-size:0.7rem;color:var(--off);line-height:1.4;flex-shrink:0;}
+.bpst:last-child{border-right:none;}
+.bpst strong{display:block;font-family:'Space Mono',monospace;font-size:0.52rem;letter-spacing:0.05em;color:#444;margin-bottom:0.18rem;text-transform:uppercase;}
+
+/* PRICE CARDS */
+.pcards{display:grid;grid-template-columns:repeat(4,1fr);gap:0.9rem;margin:1.2rem 0;}
+@media(max-width:700px){.pcards{grid-template-columns:1fr 1fr;}}
+.pc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;text-align:center;}
+.pc.feat{border-color:var(--green);background:rgba(29,185,84,0.06);}
+.pc .pn{font-family:'Space Mono',monospace;font-size:0.56rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--off);margin-bottom:0.5rem;}
+.pc .pp{font-size:1.6rem;font-weight:700;letter-spacing:-0.02em;}
+.pc .pu{font-size:0.7rem;color:var(--off);font-weight:400;}
+.pc .pd{font-size:0.68rem;color:#555;margin-top:0.4rem;line-height:1.35;}
+
+/* HIGHLIGHT BOX */
+.hbox{background:var(--surface);border:1px solid rgba(29,185,84,0.25);border-radius:10px;padding:1.3rem;margin-top:1.3rem;}
+.hbl{font-family:'Space Mono',monospace;font-size:0.57rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);margin-bottom:0.5rem;}
+.hbox p{font-size:0.85rem;color:var(--off);line-height:1.7;}
+.hbox p strong{color:var(--white);}
+
+/* PROBLEM BOX */
+.pbox{background:rgba(233,20,41,0.06);border:1px solid rgba(233,20,41,0.25);border-radius:10px;padding:1.3rem;margin:1.3rem 0;}
+.pbl{font-family:'Space Mono',monospace;font-size:0.57rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--red);margin-bottom:0.5rem;}
+.pbox p{font-size:0.85rem;color:var(--off);line-height:1.7;}
+.pbox p strong{color:var(--white);}
+
+/* REC BOX */
+.rbox{background:rgba(29,185,84,0.06);border:1px solid rgba(29,185,84,0.3);border-radius:10px;padding:1.3rem;margin:1.3rem 0;}
+.rbl{font-family:'Space Mono',monospace;font-size:0.57rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);margin-bottom:0.5rem;}
+.rbox p{font-size:0.85rem;color:var(--off);line-height:1.7;}
+.rbox p strong{color:var(--white);}
+
+/* PROG */
+.prog{margin:0.45rem 0;}
+.progl{display:flex;justify-content:space-between;font-size:0.73rem;color:var(--off);margin-bottom:0.25rem;}
+.progl span:last-child{color:var(--white);font-family:'Space Mono',monospace;font-weight:700;}
+.progt{height:5px;background:var(--border2);border-radius:100px;overflow:hidden;}
+.progf{height:100%;border-radius:100px;animation:pfill 1.1s ease both;}
+.pgr{background:var(--green);}
+.pgy{background:var(--yellow);}
+.pgr2{background:var(--red);}
+@keyframes pfill{from{width:0 !important;}}
+
+.sep{height:1px;background:var(--border);margin:1.8rem 0;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#s0" class="active">Inicio</a>
+  <a href="#s1">Diagnóstico</a>
+  <a href="#s2">Segmentación</a>
+  <a href="#s3">Posicionamiento</a>
+  <a href="#s4">Journey</a>
+  <a href="#s5">SERVQUAL/GAP</a>
+  <a href="#s6">Blueprint</a>
+  <a href="#s7">Problema & Rec.</a>
+</nav>
+
+<!-- HERO -->
+<section id="s0" class="slide" style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="inner" style="text-align:center;position:relative;z-index:2;">
+    <div class="hbadge"><div class="dot"></div><span>Trabajo Integrador · Diseño y Gestión Estratégica de un Servicio</span></div>
+    <h1 class="ht"><span class="g">Spot</span>ify<br>Argentina</h1>
+    <p class="hsub">Análisis del servicio de streaming musical líder en Argentina: segmentación, posicionamiento, experiencia del cliente, calidad de servicio y recomendación estratégica.</p>
+    <div class="hstats">
+      <div class="hst"><div class="v">713M</div><div class="l">MAUs globales Q3 2025</div></div>
+      <div class="hst"><div class="v">281M</div><div class="l">Suscriptores Premium</div></div>
+      <div class="hst"><div class="v">#1</div><div class="l">Streaming musical en AR</div></div>
+      <div class="hst"><div class="v">$3.299</div><div class="l">Plan Individual en Argentina</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 01 DIAGNÓSTICO -->
+<section id="s1" class="slide">
+  <div class="inner">
+    <div class="stope">
+      <div class="snum">// 01</div>
+      <div><h2 class="st">Diagnóstico <span class="g">Actual</span></h2><p class="sd">¿Qué es Spotify y cómo funciona en Argentina?</p></div>
+    </div>
+
+    <div class="g2">
+      <div>
+        <div class="card">
+          <div class="cl">El servicio</div>
+          <h3>Plataforma de audio streaming freemium</h3>
+          <p>Fundada en Suecia en 2006, presente en Argentina desde 2013. Opera con dos capas: <strong>plan Free</strong> (gratuito con anuncios) y <strong>planes Premium</strong> de pago. Ofrece música, podcasts, audiolibros y video. Líder absoluto del mercado en Argentina.</p>
+        </div>
+        <br>
+        <div class="card">
+          <div class="cl">Necesidad que resuelve</div>
+          <h3>Acceso instantáneo a toda la música</h3>
+          <p>Elimina la compra de álbumes individuales. Resuelve la <strong>descubierta musical</strong> (¿qué escucho ahora?) con algoritmos personalizados como Discover Weekly y Daily Mix. Permite escucha offline sin datos.</p>
+        </div>
+      </div>
+      <div>
+        <div class="cl" style="margin-bottom:0.7rem;">Planes vigentes en Argentina (desde sep. 2025)</div>
+        <div class="pcards">
+          <div class="pc">
+            <div class="pn">Free</div>
+            <div class="pp">$0<span class="pu">/mes</span></div>
+            <div class="pd">Con anuncios · Sin descarga</div>
+          </div>
+          <div class="pc feat">
+            <div class="pn">Individual ⭐</div>
+            <div class="pp">$3.299<span class="pu">/mes</span></div>
+            <div class="pd">Sin anuncios · 1 cuenta</div>
+          </div>
+          <div class="pc">
+            <div class="pn">Dúo</div>
+            <div class="pp">$4.399<span class="pu">/mes</span></div>
+            <div class="pd">2 cuentas · mismo domicilio</div>
+          </div>
+          <div class="pc">
+            <div class="pn">Familiar</div>
+            <div class="pp">$5.499<span class="pu">/mes</span></div>
+            <div class="pd">Hasta 6 cuentas + Kids</div>
+          </div>
+        </div>
+        <div class="g3" style="margin-top:0.9rem;">
+          <div class="sc"><div class="badge bg">↑11% YoY</div><div class="sv">713M</div><div class="sl">MAUs globales Q3 2025</div></div>
+          <div class="sc"><div class="badge bg">LatAm líder</div><div class="sv">~7M</div><div class="sl">Usuarios est. Argentina</div></div>
+          <div class="sc"><div class="badge by">Competencia</div><div class="sv">31.6%</div><div class="sl">Gross Margin Q3 2025</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 SEGMENTACIÓN -->
+<section id="s2" class="slide">
+  <div class="inner">
+    <div class="stope">
+      <div class="snum">// 02</div>
+      <div><h2 class="st"><span class="g">Segmentación</span></h2><p class="sd">Tres perfiles reales de usuarios en Argentina</p></div>
+    </div>
+
+    <div class="g3">
+      <div class="card">
+        <div class="cl">Segmento 01 · Primario</div>
+        <h3>El Joven Urbano</h3>
+        <p><strong>18–30 años</strong>, estudiante o primer empleo. Nativo digital. Actualmente en Free o Estudiantes ($1.799). Alta sensibilidad al precio.<br><br>Descubre artistas con el algoritmo. El Wrapped es un evento social que comparte en stories. Principal segmento a convertir de Free a pago.</p>
+      </div>
+      <div class="card">
+        <div class="cl">Segmento 02 · Secundario</div>
+        <h3>El Profesional Millennial</h3>
+        <p><strong>28–40 años</strong>, ingreso medio-alto. <strong>Suscriptor Premium Individual o Dúo.</strong> Escucha música para trabajar y podcasts en el gym o commute.<br><br>Valora la ausencia de anuncios y la descarga offline. Baja sensibilidad al precio. El segmento más rentable.</p>
+      </div>
+      <div class="card">
+        <div class="cl">Segmento 03 · Familiar</div>
+        <h3>El Hogar Conectado</h3>
+        <p><strong>30–50 años</strong>, con hijos. Plan Familiar ($5.499) para toda la casa. Mayor ticket promedio.<br><br>Conecta Spotify al smart TV, parlantes y autos. Alta lealtad si la experiencia multidevice funciona. Los chicos usan Spotify Kids.</p>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <table class="t">
+      <thead><tr><th>Variable</th><th>Joven Urbano</th><th>Profesional Millennial</th><th>Hogar Conectado</th></tr></thead>
+      <tbody>
+        <tr><td>Plan más usado</td><td class="hl">Free / Estudiantes $1.799</td><td class="hl">Individual $3.299</td><td class="hl">Familiar $5.499</td></tr>
+        <tr><td>Pain point #1</td><td class="rr">Anuncios constantes</td><td class="yr">Aumentos de precio</td><td>UX multidevice</td></tr>
+        <tr><td>Driver de fidelización</td><td>Descubrimiento musical</td><td>Sin anuncios + offline</td><td>Múltiples cuentas</td></tr>
+        <tr><td>Potencial de upgrade</td><td class="hl">Alto (Free → Premium)</td><td class="yr">Medio (retener)</td><td class="hl">Alto (retener)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 03 POSICIONAMIENTO -->
+<section id="s3" class="slide">
+  <div class="inner">
+    <div class="stope">
+      <div class="snum">// 03</div>
+      <div><h2 class="st"><span class="g">Posicionamiento</span></h2><p class="sd">Cómo es percibido Spotify y contra quién compite</p></div>
+    </div>
+
+    <div class="g2">
+      <div>
+        <div class="card" style="margin-bottom:1.1rem;">
+          <div class="cl">Percibido en Argentina</div>
+          <h3>"El lugar donde está toda la música"</h3>
+          <p>Estándar de facto del streaming musical. Catálogo más amplio, mejores playlists algorítmicas. Pero también percibido como <strong>"el que más aumenta los precios"</strong> — lo que tensiona la relación con el segmento joven.</p>
+        </div>
+        <div class="card">
+          <div class="cl" style="color:var(--green)">Posicionamiento deseado</div>
+          <h3>"Tu universo de audio personalizado"</h3>
+          <p>Ir más allá de la música: podcasts, audiolibros, video, IA DJ. Ser la plataforma de audio completa que <strong>anticipa lo que querés escuchar</strong> antes de que lo sepas vos mismo.</p>
+        </div>
+      </div>
+      <div>
+        <table class="t" style="margin-bottom:1.1rem;">
+          <thead><tr><th>Plataforma</th><th>Diferencial</th><th>Debilidad vs. Spotify</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Apple Music</strong></td><td>Audio lossless</td><td class="hl">Sin algoritmo de descubrimiento real</td></tr>
+            <tr><td><strong>YouTube Music</strong></td><td>Video oficial + gratuito</td><td class="hl">UX inferior, menos podcasts</td></tr>
+            <tr><td><strong>Amazon Music</strong></td><td>Incluido en Prime</td><td class="hl">Catálogo de podcasts limitado</td></tr>
+            <tr><td><strong>Deezer</strong></td><td>Nichos musicales</td><td class="hl">Mucho menor base de usuarios</td></tr>
+          </tbody>
+        </table>
+        <div class="card">
+          <div class="cl">Ventaja competitiva central</div>
+          <h3>El algoritmo de recomendación</h3>
+          <p>Discover Weekly, Daily Mix e IA DJ son imposibles de replicar sin el historial acumulado de escucha. <strong>Nadie tiene el mismo Spotify.</strong> Esa personalización es la barrera de salida más poderosa que tiene la marca.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 CUSTOMER JOURNEY -->
+<section id="s4" class="slide">
+  <div class="inner">
+    <div class="stope">
+      <div class="snum">// 04</div>
+      <div><h2 class="st">Customer <span class="g">Journey</span></h2><p class="sd">Joven Urbano que pasa de Free a Premium</p></div>
+    </div>
+
+    <div class="journey">
+      <div class="js hi">
+        <div class="jn">01</div><div class="je">🔍</div>
+        <h4>Descubrimiento</h4>
+        <div class="jd">Ve el Spotify Wrapped de un amigo en Instagram. Descarga la app. El free es inmediato, sin tarjeta.</div>
+        <div class="jp">Pain: No sabe la diferencia real con Premium hasta que choca con las limitaciones.</div>
+      </div>
+      <div class="js">
+        <div class="jn">02</div><div class="je">🎵</div>
+        <h4>Consideración</h4>
+        <div class="jd">Usa Free varias semanas. Los anuncios empiezan a molestar. Ve la oferta "3 meses gratis" y evalúa si vale el precio.</div>
+        <div class="jp">Pain: El salto de $0 a $3.299 se siente grande en un contexto inflacionario.</div>
+      </div>
+      <div class="js hi">
+        <div class="jn">03</div><div class="je">💳</div>
+        <h4>Conversión</h4>
+        <div class="jd">Activa el mes de prueba. Primera experiencia sin anuncios. Decide pagar mensualmente.</div>
+        <div class="jp">⭐ Momento de la Verdad: si en la prueba el algoritmo no deslumbra, no se queda.</div>
+      </div>
+      <div class="js">
+        <div class="jn">04</div><div class="je">🎧</div>
+        <h4>Uso</h4>
+        <div class="jd">Escucha diariamente. Descubre artistas con Discover Weekly. Spotify se vuelve hábito: gym, trabajo, colectivo.</div>
+        <div class="jp">⭐ Momento de la Verdad #2: si el algoritmo recomienda bien, es casi imposible irse.</div>
+      </div>
+      <div class="js hi">
+        <div class="jn">05</div><div class="je">🔁</div>
+        <h4>Fidelización</h4>
+        <div class="jd">Wrapped en diciembre genera orgullo. Recomienda Spotify. Evalúa upgrade a Dúo.</div>
+        <div class="jp">Pain: cada aumento de precio reactiva la evaluación de cancelación.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 SERVQUAL / GAP -->
+<section id="s5" class="slide">
+  <div class="inner">
+    <div class="stope">
+      <div class="snum">// 05</div>
+      <div><h2 class="st">SERVQUAL <span class="g">& GAP Model</span></h2><p class="sd">Calidad percibida vs. esperada en Argentina</p></div>
+    </div>
+
+    <div class="g2">
+      <div>
+        <div class="cl" style="margin-bottom:0.8rem;">Análisis SERVQUAL (escala 1–7 · línea = expectativa)</div>
+        <div class="sq"><div class="sql">Fiabilidad</div><div class="sqt"><div class="sqe" style="left:86%;"></div><div class="sqf sqg" style="width:86%;"></div></div><div class="sqv" style="color:var(--green)">6.0 / 6.0 ✓</div></div>
+        <div style="font-size:0.67rem;color:#444;margin:-0.2rem 0 0.5rem 120px;font-style:italic;">App estable. Alta disponibilidad.</div>
+
+        <div class="sq"><div class="sql">Capacidad resp.</div><div class="sqt"><div class="sqe" style="left:72%;"></div><div class="sqf sqy" style="width:50%;"></div></div><div class="sqv" style="color:var(--yellow)">3.5 / 5.0 ⚠</div></div>
+        <div style="font-size:0.67rem;color:#444;margin:-0.2rem 0 0.5rem 120px;font-style:italic;">Soporte lento, chatbot impersonal.</div>
+
+        <div class="sq"><div class="sql">Seguridad</div><div class="sqt"><div class="sqe" style="left:78%;"></div><div class="sqf sqg" style="width:78%;"></div></div><div class="sqv" style="color:var(--green)">5.5 / 5.5 ✓</div></div>
+        <div style="font-size:0.67rem;color:#444;margin:-0.2rem 0 0.5rem 120px;font-style:italic;">Pagos seguros, datos protegidos.</div>
+
+        <div class="sq"><div class="sql">Empatía</div><div class="sqt"><div class="sqe" style="left:78%;"></div><div class="sqf sqg" style="width:84%;"></div></div><div class="sqv" style="color:var(--green)">5.9 / 5.6 ✓✓</div></div>
+        <div style="font-size:0.67rem;color:#444;margin:-0.2rem 0 0.5rem 120px;font-style:italic;">Personalización supera expectativa.</div>
+
+        <div class="sq"><div class="sql">Tangibles</div><div class="sqt"><div class="sqe" style="left:80%;"></div><div class="sqf sqg" style="width:87%;"></div></div><div class="sqv" style="color:var(--green)">6.1 / 5.7 ✓✓</div></div>
+        <div style="font-size:0.67rem;color:#444;margin:-0.2rem 0 0.5rem 120px;font-style:italic;">App y UI excelentes.</div>
+      </div>
+
+      <div>
+        <div class="cl" style="margin-bottom:0.8rem;">GAP Model — Las 5 brechas en Spotify Argentina</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;">
+          <div class="gr"><div class="gb g1b">GAP 1</div><div class="gt"><h4>No conocer al cliente local</h4><p>No investiga el impacto de los aumentos en Argentina. La inflación es estructural, pero la estrategia de precios es global.</p></div></div>
+          <div class="gr"><div class="gb g2b">GAP 2</div><div class="gt"><h4>Estándares de soporte inadecuados</h4><p>Promete "soporte 24/7". En Argentina, el canal principal es un chatbot con tiempos de respuesta de <strong>48–72 hs</strong>.</p></div></div>
+          <div class="gr"><div class="gb g3b">GAP 3</div><div class="gt"><h4>Ejecución del soporte</h4><p>Agentes sin contexto del mercado local: <strong>billeteras virtuales, tarjetas prepagas, cuotas</strong>. Muchos problemas de facturación sin solución real.</p></div></div>
+          <div class="gr"><div class="gb g4b">GAP 4</div><div class="gt"><h4>Comunicación de precios</h4><p>Los aumentos se notifican sin mostrar el valor agregado. El usuario percibe <strong>"suben sin avisar bien"</strong> aunque haya email con 30 días de anticipación.</p></div></div>
+          <div class="gr"><div class="gb g5b">GAP 5</div><div class="gt"><h4>Brecha del cliente</h4><p>Expectativa: plataforma premium accesible. Percepción con cada ajuste: <strong>"cara y que no para de subir"</strong>. El GAP 5 se activa con cada aumento.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 BLUEPRINT -->
+<section id="s6" class="slide">
+  <div class="inner">
+    <div class="stope">
+      <div class="snum">// 06</div>
+      <div><h2 class="st">Service <span class="g">Blueprint</span></h2><p class="sd">Escenario: usuario Free que convierte a Premium Individual</p></div>
+    </div>
+
+    <div class="bp">
+      <div class="bprow"><div class="bpz ze">Evidencia física</div><div class="bps">
+        <div class="bpst"><strong>Descubrimiento</strong>App store · banner "3 meses gratis"</div>
+        <div class="bpst"><strong>Consideración</strong>Pantalla Free vs. Premium en app</div>
+        <div class="bpst"><strong>Conversión</strong>Pantalla de pago · email confirmación</div>
+        <div class="bpst"><strong>Uso</strong>App sin anuncios · ícono Premium</div>
+        <div class="bpst"><strong>Fidelización</strong>Spotify Wrapped · resumen anual</div>
+      </div></div>
+      <div class="bprow"><div class="bpz zf">Frontstage</div><div class="bps">
+        <div class="bpst"><strong>Descubrimiento</strong>Descarga gratuita · primeras canciones con anuncios</div>
+        <div class="bpst"><strong>Consideración</strong>Ve el botón "Probar Premium" · compara planes</div>
+        <div class="bpst"><strong>Conversión</strong>Ingresa datos · activa prueba · primer uso sin anuncios</div>
+        <div class="bpst"><strong>Uso</strong>Discover Weekly · descarga offline · IA DJ</div>
+        <div class="bpst"><strong>Fidelización</strong>Wrapped compartible · historial personal</div>
+      </div></div>
+      <div class="bprow"><div class="bpz zb">Backstage</div><div class="bps">
+        <div class="bpst"><strong>Descubrimiento</strong>Algoritmo app store · campañas Meta/Google</div>
+        <div class="bpst"><strong>Consideración</strong>A/B testing pantalla de upgrade · motor de recomendación</div>
+        <div class="bpst"><strong>Conversión</strong>Sistema de pagos · activa cuenta Premium · CRM</div>
+        <div class="bpst"><strong>Uso</strong>Machine learning actualiza perfil de escucha</div>
+        <div class="bpst"><strong>Fidelización</strong>Sistema Wrapped procesa data · genera visuales</div>
+      </div></div>
+      <div class="bprow"><div class="bpz zs">Procesos internos</div><div class="bps">
+        <div class="bpst"><strong>Descubrimiento</strong>Equipo marketing · deals con artistas</div>
+        <div class="bpst"><strong>Consideración</strong>Equipo producto · UX research · pricing</div>
+        <div class="bpst"><strong>Conversión</strong>Plataforma pagos · equipo legal/fiscal AR</div>
+        <div class="bpst"><strong>Uso</strong>Equipos ML/IA · licencias con sellos musicales</div>
+        <div class="bpst"><strong>Fidelización</strong>Equipo retención · análisis churn</div>
+      </div></div>
+    </div>
+
+    <div class="g2">
+      <div class="card">
+        <div class="cl">Hallazgo del blueprint</div>
+        <h3>La conversión es 100% automática</h3>
+        <p>No hay intervención humana en ningún paso. Eso es escalable, pero si algo falla en el pago <strong>no hay nadie que lo resuelva en el momento.</strong> El equipo de soporte queda completamente fuera del flujo principal.</p>
+      </div>
+      <div class="card">
+        <div class="cl">Proceso interno más valioso</div>
+        <h3>El algoritmo de escucha</h3>
+        <p>Años de historial acumulado. Nadie tiene el mismo Spotify. <strong>Es la razón por la que los usuarios no se van</strong> — cambiar de plataforma implicaría "empezar de cero" con las recomendaciones.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 PROBLEMA & RECOMENDACIÓN -->
+<section id="s7" class="slide">
+  <div class="inner">
+    <div class="stope">
+      <div class="snum">// 07</div>
+      <div><h2 class="st">Problema <span class="g">& Recomendación</span></h2><p class="sd">El principal desafío de Spotify en Argentina y cómo resolverlo</p></div>
+    </div>
+
+    <div class="pbox">
+      <div class="pbl">🔴 Problema identificado — Alta tasa de cancelación post-aumento de precio</div>
+      <p>Spotify aplicó múltiples aumentos de precio en Argentina durante 2024 y 2025 — el plan Individual pasó de $2.499 a $3.299 entre abril y septiembre de 2025. <strong>Cada aumento genera una ola masiva de cancelaciones y quejas en redes sociales</strong>, especialmente en el segmento joven (18–30 años) que ya tiene presión inflacionaria en todos sus gastos.<br><br>
+      El problema no es solo el precio en sí: es que <strong>Spotify sube el precio sin explicar el valor que agrega</strong>. El usuario percibe que paga más por lo mismo. En un mercado como Argentina, donde la capacidad de gasto es sensible, esa percepción es letal para la retención.</p>
+    </div>
+
+    <div class="g2" style="margin-top:0;">
+      <div class="card">
+        <div class="cl" style="color:var(--red)">Evidencia del problema</div>
+        <h3>Los datos lo confirman</h3>
+        <p>
+          <strong>Precio Individual en Argentina:</strong> de $2.499 (abr. 2025) a $3.299 (sep. 2025) — aumento del 32% en 5 meses.<br><br>
+          <strong>Contexto:</strong> Apple Music y Amazon Music ofrecen audio lossless sin costo adicional — ventaja que Spotify aún no tiene en planes estándar.<br><br>
+          <strong>Señal de alarma:</strong> Cada anuncio de aumento en X/Twitter genera miles de "me voy a Apple Music" o "cancelo Premium", lo que indica que la retención es frágil.
+        </p>
+      </div>
+      <div>
+        <div class="prog"><div class="progl"><span>Precio Individual (abr. 2025)</span><span>$2.499</span></div><div class="progt"><div class="progf pgr" style="width:57%;"></div></div></div>
+        <div class="prog"><div class="progl"><span>Precio Individual (sep. 2025)</span><span>$3.299</span></div><div class="progt"><div class="progf pgy" style="width:75%;"></div></div></div>
+        <div class="prog"><div class="progl"><span>Precio Estudiantes (sep. 2025)</span><span>$1.799</span></div><div class="progt"><div class="progf pgr" style="width:41%;"></div></div></div>
+        <div class="prog" style="margin-top:0.8rem;"><div class="progl"><span>Precio Dúo (sep. 2025)</span><span>$4.399</span></div><div class="progt"><div class="progf pgy" style="width:100%;"></div></div></div>
+        <div class="prog"><div class="progl"><span>Precio Familiar (sep. 2025)</span><span>$5.499</span></div><div class="progt"><div class="progf pgr2" style="width:100%;"></div></div></div>
+        <div style="font-size:0.65rem;color:#444;margin-top:0.5rem;font-style:italic;font-family:'Space Mono',monospace;">Fuente: spotify.com/ar/premium (vigente 2025)</div>
+      </div>
+    </div>
+
+    <div class="rbox">
+      <div class="rbl">✅ Recomendación — Estrategia "Precio con Historia"</div>
+      <p>
+        La solución no es congelar los precios — es <strong>cambiar cómo se comunica el aumento</strong>. Proponemos implementar una campaña obligatoria previa a cada ajuste tarifario llamada <strong>"Esto es lo nuevo"</strong>:<br><br>
+        <strong>60 días antes del aumento:</strong> notificación in-app (no solo email) con un resumen visual de todas las funciones nuevas incorporadas en el período: audiolibros, IA DJ, videos de artistas, mejoras en el algoritmo. El mensaje es "estás pagando más porque tenés más".<br><br>
+        <strong>30 días antes:</strong> ofrecer a usuarios en riesgo de cancelación (los que llevan menos de 6 meses de Premium) la posibilidad de mantener el precio anterior por 3 meses a cambio de activar el plan anual. Reduce el churn inmediato y convierte pagos mensuales en anuales.<br><br>
+        <strong>En el día del aumento:</strong> mensaje personalizado que muestra las estadísticas de uso del usuario: "Escuchaste 847 horas este año. Tu nueva suscripción te sale $X por hora de música sin anuncios." Hace tangible el valor recibido.<br><br>
+        <strong>Resultado esperado:</strong> reducir el churn post-aumento entre un 25–35%, convertir usuarios mensuales a planes anuales y generar mejor percepción de la marca en un mercado donde "Spotify aumenta sin avisar" es el principal driver de cancelación.
+      </p>
+    </div>
+
+    <div class="hbox">
+      <div class="hbl">Conclusión del trabajo integrador</div>
+      <p>Spotify tiene el mejor servicio de streaming musical del mundo: algoritmo imbatible, catálogo enorme, experiencia de usuario excelente. <strong>Su problema en Argentina no es el producto — es la relación precio-valor percibida en un contexto inflacionario.</strong> Quien logre comunicar mejor el valor que entrega, gana. Y Spotify, con toda la data de uso que tiene de cada usuario, está en una posición única para hacerlo mejor que nadie.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+const slides = document.querySelectorAll('.slide:not(#s0)');
+const io = new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible');}),{threshold:0.07});
+slides.forEach(s=>io.observe(s));
+
+const links = document.querySelectorAll('nav a');
+const navIO = new IntersectionObserver(e=>{
+  e.forEach(x=>{if(x.isIntersecting&&x.intersectionRatio>0.2)links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+x.target.id));});
+},{threshold:0.2});
+document.querySelectorAll('.slide').forEach(s=>navIO.observe(s));
+
+document.querySelectorAll('.slide:not(#s0)').forEach(slide=>{
+  const els=slide.querySelectorAll('.card,.sc,.js,.gr,.hbox,.pbox,.rbox,.pc');
+  els.forEach((el,i)=>{el.style.opacity='0';el.style.transform='translateY(14px)';el.style.transition=`opacity 0.45s ease ${i*0.05}s,transform 0.45s ease ${i*0.05}s`;});
+  const cio=new IntersectionObserver(e=>{
+    e.forEach(x=>{if(x.isIntersecting)x.target.querySelectorAll('.card,.sc,.js,.gr,.hbox,.pbox,.rbox,.pc').forEach(el=>{el.style.opacity='1';el.style.transform='translateY(0)';});});
+  },{threshold:0.04});
+  cio.observe(slide);
+});
+</script>
+</body>
+</html>
